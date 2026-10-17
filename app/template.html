@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HL Paper Lab</title>
+<meta name="description" content="IB Maths AA HL past-paper question bank and mock exam builder (offline, personal study).">
+<script>
+  // apply a saved theme before first paint
+  try { var t = localStorage.getItem("hlpl.theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<style>
+{{CSS}}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <button class="icon-btn rail-toggle" id="railToggle" aria-label="Show filters" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+  </button>
+  <div class="brand">
+    <h1>HL Paper Lab</h1>
+    <span class="stats num" id="stats"></span>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button class="tab" role="tab" id="tab-bank" aria-controls="bank" aria-selected="true">Question bank</button>
+    <button class="tab" role="tab" id="tab-exam" aria-controls="exam" aria-selected="false" tabindex="-1">Mock exam<span class="badge num" id="examBadge" hidden></span></button>
+  </nav>
+  <button class="icon-btn" id="themeBtn" aria-label="Toggle colour theme" title="Toggle light / dark">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+  </button>
+</header>
+
+<!-- ======================= QUESTION BANK ======================= -->
+<section class="view" id="bank" role="tabpanel" aria-labelledby="tab-bank">
+  <aside class="rail" id="bankRail" aria-label="Filters">
+    <div class="facet">
+      <div class="facet-head"><h3>Topic</h3><button class="link-btn" data-clear="topics">All</button></div>
+      <div id="f-topics"></div>
+    </div>
+    <div class="facet">
+      <div class="facet-head"><h3>Sub-topic</h3><button class="link-btn" data-clear="subs">All</button></div>
+      <div class="subs" id="f-subs"></div>
+    </div>
+    <div class="facet">
+      <h3>Marks</h3>
+      <div class="range-row">
+        <label class="sr-only" for="mmin">Minimum marks</label><input type="number" id="mmin" min="1" max="25">
+        <span aria-hidden="true">to</span>
+        <label class="sr-only" for="mmax">Maximum marks</label><input type="number" id="mmax" min="1" max="25">
+      </div>
+    </div>
+    <div class="facet"><h3>Question length</h3><div class="seg" id="f-section"></div></div>
+    <div class="facet"><h3>Calculator</h3><div class="seg" id="f-calc"></div></div>
+    <div class="facet"><h3>Syllabus</h3><div class="seg" id="f-syl"></div></div>
+    <div class="facet"><h3>Level</h3><div class="seg" id="f-level"></div></div>
+    <div class="facet"><h3>Paper</h3><div class="seg" id="f-paper"></div></div>
+    <div class="facet">
+      <div class="facet-head"><h3>Session</h3><button class="link-btn" data-clear="sessions">All</button></div>
+      <div id="f-sessions"></div>
+    </div>
+    <div class="facet">
+      <label class="toggle"><span>Official mark scheme only</span><input type="checkbox" id="officialOnly"></label>
+      <p class="hint" id="officialHint"></p>
+      <button class="btn reset" id="resetFilters">Reset all filters</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="toolbar">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span class="sr-only">Search questions</span>
+        <input type="search" id="q" placeholder="Search descriptions, sub-topics, papers…  (press / to focus)" autocomplete="off">
+      </label>
+      <span class="result-count" id="resultCount" aria-live="polite"></span>
+      <label class="sr-only" for="sort">Sort</label>
+      <select id="sort">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="syllabus">Syllabus order</option>
+        <option value="marksAsc">Marks: low to high</option>
+        <option value="marksDesc">Marks: high to low</option>
+        <option value="paper">Paper number</option>
+        <option value="shuffle">Shuffle</option>
+      </select>
+    </div>
+    <div class="list" id="list" role="list" aria-label="Questions"></div>
+  </main>
+</section>
+
+<!-- ======================= MOCK EXAM ======================= -->
+<section class="view" id="exam" role="tabpanel" aria-labelledby="tab-exam" hidden>
+  <aside class="rail" id="examRail" aria-label="Mock exam settings">
+    <div class="facet">
+      <div class="facet-head"><h3>Topics</h3><button class="link-btn" id="exAllTopics">All</button></div>
+      <div id="ex-topics"></div>
+    </div>
+    <div class="facet">
+      <h3>Target marks</h3>
+      <div class="target-row">
+        <label class="sr-only" for="exTargetRange">Target marks (slider)</label>
+        <input type="range" id="exTargetRange" min="10" max="330" step="1">
+        <label class="sr-only" for="exTarget">Target marks</label>
+        <input type="number" id="exTarget" min="10" max="330">
+      </div>
+      <div class="presets" id="exPresets">
+        <button data-v="40">40</button><button data-v="55">55</button><button data-v="110">110</button><button data-v="220">220</button>
+      </div>
+      <p class="hint">110 is a full HL Paper 1 or 2; 55 is one section. Suggested time is 1 minute per mark.</p>
+    </div>
+    <div class="facet">
+      <h3>Paper style</h3>
+      <div class="seg" id="ex-style">
+        <label><input type="radio" name="exstyle" value="any" checked>Any</label>
+        <label><input type="radio" name="exstyle" value="p1">No calc</label>
+        <label><input type="radio" name="exstyle" value="p2">Calculator</label>
+      </div>
+    </div>
+    <div class="facet">
+      <label class="toggle"><span>Current syllabus only</span><input type="checkbox" id="exCurrent" checked></label>
+      <label class="toggle" style="margin-top:8px"><span>Official mark schemes only</span><input type="checkbox" id="exOfficial"></label>
+      <button class="btn primary gen-btn" id="generate">Generate paper</button>
+      <p class="hint" id="genHint"></p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="exam-summary">
+      <span class="total num" id="exTotal"></span>
+      <span class="fit" id="exFit" hidden></span>
+      <span class="spacer"></span>
+      <button class="btn" id="exClear">Clear</button>
+      <button class="btn" id="printPaper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></svg>
+        Print / Save as PDF</button>
+      <button class="btn" id="printPaperMs">Print with mark schemes</button>
+    </div>
+    <div class="sel-list" id="selList" aria-label="Selected questions"></div>
+    <div class="paper-wrap" id="paperWrap"></div>
+  </main>
+</section>
+
+<!-- ======================= READER ======================= -->
+<div class="reader" id="reader" hidden>
+  <div class="reader-panel" role="dialog" aria-modal="true" aria-labelledby="rdTitle">
+    <div class="reader-bar">
+      <button class="icon-btn" id="rdPrev" aria-label="Previous question" title="Previous (←)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <button class="icon-btn" id="rdNext" aria-label="Next question" title="Next (→)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></button>
+      <div class="title"><div class="t" id="rdTitle"></div><div class="m" id="rdMeta"></div></div>
+      <span class="pos num" id="rdPos"></span>
+      <button class="btn" id="rdAdd"></button>
+      <button class="icon-btn" id="rdClose" aria-label="Close (Esc)" title="Close (Esc)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="reader-body" id="rdBody"></div>
+  </div>
+</div>
+
+<script type="application/json" id="db">{{DATA}}</script>
+<script type="application/json" id="imgs">{{IMGS}}</script>
+<script>
+const IMAGE_MODE = "{{MODE}}";
+{{JS}}
+</script>
+</body>
+</html>

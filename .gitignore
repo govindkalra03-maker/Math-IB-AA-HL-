@@ -1,0 +1,23 @@
+# --- Never commit IB material -------------------------------------------------------------
+# Past papers and mark schemes are © International Baccalaureate Organization. Everything
+# generated from them (crops, PDFs, the dashboard, screenshots) stays local.
+out/
+dist/
+verify/
+*.pdf
+*.png
+*.webp
+*.zip
+
+# Data derived from the papers: an inventory of the local PDF files, and per-question
+# descriptions/classifications of IB questions.
+papers.json
+identify_report.json
+classify.json
+
+# --- Local tooling --------------------------------------------------------------------------
+.venv/
+__pycache__/
+*.pyc
+.claude/
+.DS_Store
